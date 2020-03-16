@@ -19,6 +19,7 @@ import http.client
 import requests
 import io
 import chardet
+from datetime import datetime as dt
 
 """ defs
 """
@@ -420,7 +421,14 @@ def call_api(request_url):
 def conv_time(package_date):
 
     d = package_date.split('.')
-    d = d[0].split('T')
+
+    p_datetime = d[0]
+
+    t_datetime = dt.strptime(p_datetime, '%Y-%m-%dT%H:%M:%S')
+    t_datetime_jpn = t_datetime + datetime.timedelta(hours=9)
+    t_str = t_datetime_jpn.strftime('%Y-%m-%dT%H:%M:%S')
+    
+    d = t_str.split('T')
     dd = d[0]
     tt = d[1]
     hour = tt.split(':')[0]
