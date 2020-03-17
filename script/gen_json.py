@@ -420,24 +420,23 @@ def call_api(request_url):
 
 def conv_time(package_date):
 
-    d = package_date.split('.')
+    pd = package_date.split('.')
 
-    p_datetime = d[0]
-
-    t_datetime = dt.strptime(p_datetime, '%Y-%m-%dT%H:%M:%S')
-    t_datetime_jpn = t_datetime + datetime.timedelta(hours=9)
-    t_str = t_datetime_jpn.strftime('%Y-%m-%dT%H:%M:%S')
+    td = dt.strptime(pd[0], '%Y-%m-%dT%H:%M:%S')
+    td_jpn = td + datetime.timedelta(hours=9)
+    td_jpn_str = td_jpn.strftime('%Y-%m-%dT%H:%M:%S')
     
-    d = t_str.split('T')
-    dd = d[0]
-    tt = d[1]
-    hour = tt.split(':')[0]
-    min  = tt.split(':')[1]
-    sec  = tt.split(':')[2]
-
-    date_str = dd.replace('-', '\/') + " " + hour + ":" + min
+    td_jpn_str_sep = td_jpn_str.split('T')
+    td_date = td_jpn_str_sep[0]
+    td_time = td_jpn_str_sep[1]
     
-    return(date_str)
+    hour = td_time.split(':')[0]
+    min  = td_time.split(':')[1]
+    sec  = td_time.split(':')[2]
+
+    datetime_str = td_date.replace('-', '\/') + " " + hour + ":" + min
+    
+    return(datetime_str)
 
 def main_sub():
 

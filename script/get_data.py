@@ -128,20 +128,18 @@ def gen_patients_summary():
     patients_filepath = WORK_DIR + "/" + TOOL_DIR + "/" + INPUT_DIR + "/" + 'patients.csv'
     df_patients = pd.read_csv(patients_filepath)
 
-    # find patients in each inspection's day
-    for index, row in df_patients_summary.iterrows():
-        summary_date = row['年月日']
-        
-        patients_num = 0
-        for index2, row2 in df_patients.iterrows():
-            patients_date = row2['公表_年月日']
+    # check for each patients info
+    for index, row in df_patients.iterrows():
+        patients_date = row['公表_年月日']
+
+        # find patients in each inspection's day
+        for index2, row2 in df_patients_summary.iterrows():
+            summary_date = row2['年月日']
 
             if summary_date == patients_date:
-                patients_num  = patients_num + 1
-            
-        df_patients_summary.loc[index, '患者判明数'] = patients_num
-
-    # update inspections info
+                patients_num = df_patients_summary.loc[index2, '患者判明数']
+                df_patients_summary.loc[index2, '患者判明数'] = patients_num + 1
+                break
 
     return(df_patients_summary)
 
