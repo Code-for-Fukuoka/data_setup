@@ -322,11 +322,13 @@ def gen_main_summary(total_visit,
                             "children": [
                                 {
                                     "attr": "軽症・中等症",
-                                    "value": total_mild + total_medium
+                                    # "value": total_mild + total_medium
+                                    "value": '-'
                                 },
                                 {
                                     "attr": "重症",
-                                    "value": total_heavy
+                                    # "value": total_heavy
+                                    "value": '-'
                                 }
                             ]
                         },
@@ -336,7 +338,8 @@ def gen_main_summary(total_visit,
                         },
                         {
                             "attr": "死亡",
-                            "value": total_died
+                            # "value": total_died
+                            "value": '-'
                         }
                     ]
                 }
@@ -437,6 +440,19 @@ def conv_time(package_date):
     datetime_str = td_date.replace('-', '\/') + " " + hour + ":" + min
     
     return(datetime_str)
+
+def gen_total_discharge():
+
+    file_path = WORK_DIR + "/" + TOOL_DIR + "/" + OUTPUT_DIR + "/" + "patients.json"
+
+    patients_dict = load_json_file(file_path)
+
+    total_discharge = 0
+    for d in patients_dict['patients']['data']:
+        if d['退院'] == '○':
+            total_discharge = total_discharge + 1
+        
+    return(total_discharge)
 
 def main_sub():
 
@@ -598,9 +614,13 @@ def main_sub():
             # 退院者数
             better_discharge_summary_dict = conv_better_patients_summary_dict(records_dict, 'discharge')
 
+            total_discharge = gen_total_discharge()
+
+            """
             total_discharge = 0
             for k in better_discharge_summary_dict:
                 total_discharge = total_discharge + int(better_discharge_summary_dict[k])
+            """
             
             # 死亡
             better_died_summary_dict = conv_better_patients_summary_dict(records_dict, 'died')
