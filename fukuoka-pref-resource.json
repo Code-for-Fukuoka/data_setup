@@ -1,0 +1,38 @@
+{
+    "organization" : {
+	"id" : "400009",
+	"url" : "https://ckan.open-governmentdata.org"
+    },
+    "resource" : {
+	"visit" : {
+	    "title" : "相談センター相談件数",
+	    "type" : "url",
+	    "dataset": "401000_pref_fukuoka_covid19_kikokusyasessyokusya",
+	    "filename": "visit.csv"
+	},
+	"hotline": {
+	    "title" : "相談ダイヤル相談件数",
+	    "type" : "file",
+	    "dataset": "",
+	    "filename": "hotline.csv"
+	},
+	"inspections" : {
+	    "title" : "検査実施数",
+	    "type" : "url",
+	    "dataset": "401000_pref_fukuoka_covid19_exam",
+	    "filename": "inspections.csv"
+	},
+	"patients" : {
+	    "title" : "陽性患者発表情報",
+	    "type" : "url",
+	    "dataset": "401000_pref_fukuoka_covid19_patients",
+	    "filename": "patients.csv"
+	},
+	"patients_summary" : {
+	    "title" : "患者情報",
+	    "type" : "file",
+	    "dataset": "",
+	    "filename": "patients_summary.csv"
+	}
+    }
+}

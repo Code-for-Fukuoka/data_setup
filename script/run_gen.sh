@@ -11,8 +11,6 @@ IDIR="input_data"
 ODIR="gen_data"
 MDIR="covid19"
 
-SYSCTL_CMD="fukuoka-city"
-
 SPATH=${WDIR}/${TDIR}/${SDIR}
 IPATH=${WDIR}/${TDIR}/${IDIR}
 OPATH=${WDIR}/${TDIR}/${ODIR}
@@ -31,17 +29,3 @@ echo "${SPATH}/merge_json.py"
 
 echo "sed 's/\\\\/\\/g' ${OPATH}/data_new.json > ${OPATH}/data.json"
       sed 's/\\\\/\\/g' ${OPATH}/data_new.json > ${OPATH}/data.json
-
-# to master
-
-echo "cp ${OPATH}/data.json ${MPATH}/data/data.json"
-      cp ${OPATH}/data.json ${MPATH}/data/data.json
-
-echo "cd ${MPATH}"
-      cd ${MPATH}
-
-echo "yarn build"
-      yarn build
-
-echo "systemctl restart ${SYSCTL_CMD}"
-      systemctl restart ${SYSCTL_CMD}
