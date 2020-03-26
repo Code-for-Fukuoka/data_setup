@@ -65,9 +65,9 @@ def get_package_data():
     ckan_dict = {}
     resource_dict = {}
     
-    for f_title in DATA_DICT:
-        type = DATA_DICT[f_title]['type']
-        dataset = DATA_DICT[f_title]['dataset']
+    for f_title in DATA_DICT['resource']:
+        type = DATA_DICT['resource'][f_title]['type']
+        dataset = DATA_DICT['resource'][f_title]['dataset']
 
         api_com = 'package_show' + '?id=' + dataset
         url = BASE_URL + '/api/3/action/' + api_com
@@ -81,8 +81,8 @@ def get_package_data():
 
 def show_package_info(resource_dict):
 
-    for f_title in DATA_DICT:
-        format = DATA_DICT[f_title]['type']
+    for f_title in DATA_DICT['resource']:
+        format = DATA_DICT['resource'][f_title]['type']
 
         if format == "url":
             last_modified = resource_dict[f_title]["resources"][0]["last_modified"]
@@ -106,13 +106,12 @@ if __name__ == '__main__':
     config.read('{}/../config.ini'.format(path), encoding="utf-8")
     config_section = 'development'
 
-    WORK_DIR = config.get(config_section, 'WORK_DIR')
+    WORK_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../..')
 
     INPUT_DIR = config.get(config_section, 'INPUT_DIR')
     OUTPUT_DIR = config.get(config_section, 'OUTPUT_DIR')
     TOOL_DIR = config.get(config_section, 'TOOL_DIR')
     RESOURCE_FILE = config.get(config_section, 'RESOURCE_FILE')
-    BASE_URL = config.get(config_section, 'CKAN_URL')
     
     DEBUG = 1
 
@@ -125,5 +124,7 @@ if __name__ == '__main__':
 
     resource_file_path = WORK_DIR + "/" + TOOL_DIR + "/" + RESOURCE_FILE
     DATA_DICT = get_resource_file_dict(resource_file_path)
+
+    BASE_URL = DATA_DICT['organization']['url']
     
     main()

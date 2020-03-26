@@ -1,11 +1,17 @@
 #!/bin/sh
 
-WDIR="[本ツール（data_setup）が置かれているディレクトリ]"
+set -e
+
+WDIR=`dirname "$(realpath "$0")"`
+WDIR=${WDIR}/../..
+
 TDIR="data_setup"
 SDIR="script"
 IDIR="input_data"
 ODIR="gen_data"
 MDIR="covid19"
+
+SYSCTL_CMD="fukuoka-city"
 
 SPATH=${WDIR}/${TDIR}/${SDIR}
 IPATH=${WDIR}/${TDIR}/${IDIR}
@@ -37,5 +43,5 @@ echo "cd ${MPATH}"
 echo "yarn build"
       yarn build
 
-echo "systemctl restart fukuoka-city"
-      systemctl restart fukuoka-city
+echo "systemctl restart ${SYSCTL_CMD}"
+      systemctl restart ${SYSCTL_CMD}

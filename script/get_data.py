@@ -30,9 +30,11 @@ def get_resource_file_dict(resource_file_dict_file):
 
     return(resource_file_dict)
 
-def output_json(filepath, o_dict):
+def output_json(filepath, filename, o_dict):
 
-    f = open(filepath, 'w')
+    org_filename = ORG_ID + "_" + filename
+    f_filepath = filepath + "/" + org_filename
+    f = open(f_filepath, 'w')
     json.dump(o_dict, f, indent=4, ensure_ascii=False)
     
     return()
@@ -72,9 +74,9 @@ def get_package_data():
     ckan_dict = {}
     resource_dict = {}
     
-    for f_title in DATA_DICT:
-        type = DATA_DICT[f_title]['type']
-        dataset = DATA_DICT[f_title]['dataset']
+    for f_title in DATA_DICT['resource']:
+        type = DATA_DICT['resource'][f_title]['type']
+        dataset = DATA_DICT['resource'][f_title]['dataset']
 
         api_com = 'package_show' + '?id=' + dataset
         url = BASE_URL + '/api/3/action/' + api_com
@@ -87,7 +89,7 @@ def get_package_data():
     return(resource_dict)
 
 def get_resource(f_title, url):
-    
+
     res = urllib.request.urlopen(url)
 
     encoding = chardet.detect(res.read())['encoding']
@@ -96,12 +98,16 @@ def get_resource(f_title, url):
         # print("P0", encoding)
         res = urllib.request.urlopen(url)
         res = res.read().decode('shift-jis')
-    elif encoding == 'UTF-8-SIG':
+    elif encoding == 'SHIFT_JIS':
         # print("P1", encoding)
+        res = urllib.request.urlopen(url)
+        res = res.read().decode('shift-jis')
+    elif encoding == 'UTF-8-SIG':
+        # print("P2", encoding)
         res = urllib.request.urlopen(url)
         res = res.read().decode('utf-8-sig')
     else:
-        # print("P1", encoding)
+        # print("P3", encoding)
         res = urllib.request.urlopen(url)
         res = res.read()
     
@@ -109,10 +115,20 @@ def get_resource(f_title, url):
     
     return (df)
 
+def gen_dummy_hotline():
+    
+    df = pd.DataFrame([[1, ORG_ID, "県名", "自治体名", "2020/01/01", "月", 0,""]], columns=['No','全国地方公共団体コード','都道府県名','市区町村名','年月日','曜日','件数','備考'])
+    
+    return(df)
+
 def gen_patients_summary():
 
+    inspections_filename = DATA_DICT['resource']['inspections']['filename']
+    patients_filename = DATA_DICT['resource']['patients']['filename']
+    
     # load inspections.csv
-    inspections_filepath = WORK_DIR + "/" + TOOL_DIR + "/" + INPUT_DIR + "/" + 'inspections.csv'
+    org_inspections_filename = ORG_ID + "_" + inspections_filename
+    inspections_filepath = I_FILEPATH + "/" + org_inspections_filename
     df_inspections = pd.read_csv(inspections_filepath)
     df_patients_summary = df_inspections
     
@@ -125,7 +141,8 @@ def gen_patients_summary():
     df_patients_summary['重症'] = 0
 
     # load inspections.csv
-    patients_filepath = WORK_DIR + "/" + TOOL_DIR + "/" + INPUT_DIR + "/" + 'patients.csv'
+    org_patients_filename = ORG_ID + "_" + patients_filename    
+    patients_filepath = I_FILEPATH + "/" + org_patients_filename
     df_patients = pd.read_csv(patients_filepath)
 
     # check for each patients info
@@ -143,21 +160,21 @@ def gen_patients_summary():
 
     return(df_patients_summary)
 
-def save_df(f_title, df):
-    
-    filename = f_title + '.csv'
-    filepath = WORK_DIR + "/" + TOOL_DIR + "/" + INPUT_DIR + "/" + filename
-    print("create:", filename)
+def save_df(f_title, filename, df):
+
+    org_filename = ORG_ID + "_" + filename
+    filepath = I_FILEPATH + "/" + org_filename
+    print("create:", org_filename)
     df.to_csv(filepath)
 
     return()
 
 def get_resource_file(resource_dict):
 
-    for f_title in DATA_DICT:
-        format = DATA_DICT[f_title]['type']
-        dataset = DATA_DICT[f_title]['dataset']
-        filename = DATA_DICT[f_title]['filename']
+    for f_title in DATA_DICT['resource']:
+        format = DATA_DICT['resource'][f_title]['type']
+        dataset = DATA_DICT['resource'][f_title]['dataset']
+        filename = DATA_DICT['resource'][f_title]['filename']
 
         if format == 'url':
             url = resource_dict[f_title]['resources'][0]['url']
@@ -165,14 +182,19 @@ def get_resource_file(resource_dict):
             # dfに格納
             df = get_resource(f_title, url)
             # dfをcsvファイルに保存
-            save_df(f_title, df)
+            save_df(f_title, filename, df)
                 
         elif format == "file":
             if f_title == "patients_summary":
                 # patients_summaryのデータをinspectionとpatientsの
                 # データから生成
                 df = gen_patients_summary()
-                save_df(f_title, df)
+                save_df(f_title, filename, df)
+                
+            if f_title == "hotline":
+                # hotlineのダミーデータを生成
+                df = gen_dummy_hotline()
+                save_df(f_title, filename, df)
         else:
             print("wrong format")
             exit()
@@ -181,8 +203,8 @@ def get_resource_file(resource_dict):
 
 def show_package_info(resource_dict):
 
-    for f_title in DATA_DICT:
-        format = DATA_DICT[f_title]['type']
+    for f_title in DATA_DICT['resource']:
+        format = DATA_DICT['resource'][f_title]['type']
 
         if format == "url":
             last_modified = resource_dict[f_title]["resources"][0]["last_modified"]
@@ -198,8 +220,7 @@ def main():
     show_package_info(resource_dict)
     
     filename = "package.json"
-    filepath = WORK_DIR + "/" + TOOL_DIR + "/" + INPUT_DIR + "/" + filename
-    output_json(filepath, resource_dict)
+    output_json(I_FILEPATH, filename, resource_dict)
     
     get_resource_file(resource_dict)
 
@@ -210,13 +231,15 @@ if __name__ == '__main__':
     config.read('{}/../config.ini'.format(path), encoding="utf-8")
     config_section = 'development'
 
-    WORK_DIR = config.get(config_section, 'WORK_DIR')
+    WORK_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../..')
 
     INPUT_DIR = config.get(config_section, 'INPUT_DIR')
     OUTPUT_DIR = config.get(config_section, 'OUTPUT_DIR')
     TOOL_DIR = config.get(config_section, 'TOOL_DIR')
     RESOURCE_FILE = config.get(config_section, 'RESOURCE_FILE')
-    BASE_URL = config.get(config_section, 'CKAN_URL')
+    
+    I_FILEPATH = WORK_DIR + "/" + TOOL_DIR + "/" + INPUT_DIR
+    O_FILEPATH = WORK_DIR + "/" + TOOL_DIR + "/" + OUTPUT_DIR
     
     DEBUG = 1
 
@@ -229,5 +252,8 @@ if __name__ == '__main__':
 
     resource_file_path = WORK_DIR + "/" + TOOL_DIR + "/" + RESOURCE_FILE
     DATA_DICT = get_resource_file_dict(resource_file_path)
-    
+
+    ORG_ID = DATA_DICT['organization']['id']
+    BASE_URL = DATA_DICT['organization']['url']
+
     main()

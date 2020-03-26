@@ -3,19 +3,6 @@
 #
 # Usage: merge_json.py
 
-"""
-    福："contacts"
-    福："querents"
-    福："patients"
-　　福："patients_summary"
-　　仮："discharges_summary"
-　　福："inspections"
-　　福："inspections_summary"
-　　仮："better_patients_summary"
-　　福："lastUpdate"
-　　仮："main_summary"
-"""
-
 """ libs
 """
 import configparser
@@ -26,11 +13,19 @@ import json
 import pprint
 import datetime
 
+def load_json_file(json_filename):
+    
+    with open(json_filename) as f:
+        dict = json.load(f)
+        f.close()
+
+    return(dict)
+                
 def output_json(o_file_name, o_list):
 
     if DEBUG == 0:
     
-        o_file_path = WORK_DIR + "/" + TOOL_DIR + "/" + OUTPUT_DIR + "/" + o_file_name
+        o_file_path = O_FILEPATH + "/" + o_file_name
     
         f = open(o_file_path, 'w')
         json.dump(o_list, f, indent=4, ensure_ascii=False)
@@ -56,7 +51,8 @@ def main():
             dict_all.update(dict)
             
         else:
-            f_filename = WORK_DIR + "/" + TOOL_DIR + "/" + OUTPUT_DIR + "/" + data_name + ".json"
+            org_data_filename = ORG_ID + "_" + data_name + ".json"
+            f_filename = O_FILEPATH + "/" + org_data_filename
 
             with open(f_filename) as f:
                 dict = json.load(f)
@@ -77,11 +73,20 @@ if __name__ == '__main__':
     config.read('{}/../config.ini'.format(path), encoding="utf-8")
     config_section = 'development'
 
-    WORK_DIR = config.get(config_section, 'WORK_DIR')
+    WORK_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../..')
+    
     INPUT_DIR = config.get(config_section, 'INPUT_DIR')
     OUTPUT_DIR = config.get(config_section, 'OUTPUT_DIR')
     TOOL_DIR = config.get(config_section, 'TOOL_DIR')
     RESOURCE_FILE = config.get(config_section, 'RESOURCE_FILE')
+
+    I_FILEPATH = WORK_DIR + "/" + TOOL_DIR + "/" + INPUT_DIR
+    O_FILEPATH = WORK_DIR + "/" + TOOL_DIR + "/" + OUTPUT_DIR
+
+    resource_file_path = WORK_DIR + "/" + TOOL_DIR + "/" + RESOURCE_FILE
+    DATA_DICT = load_json_file(resource_file_path)
+    
+    ORG_ID = DATA_DICT['organization']['id']
     
     DEBUG = 0
 
