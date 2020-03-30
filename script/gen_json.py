@@ -460,6 +460,19 @@ def gen_total_discharge():
         
     return(total_discharge)
 
+def gen_total_patients():
+
+    org_filename = ORG_ID + "_" + "patients.json"
+    file_path = O_FILEPATH + "/" + org_filename
+
+    patients_dict = load_json_file(file_path)
+
+    total_patients = 0
+    for d in patients_dict['patients']['data']:
+        total_patients = total_patients + 1
+        
+    return(total_patients)
+
 def main_sub():
 
     now = datetime.datetime.now()
@@ -537,6 +550,7 @@ def main_sub():
             data_title = f_title
             
             df_fill = df.fillna({'退院済フラグ':0})
+
             records_dict = df_fill.to_dict(orient='records')
             patients_list = conv_patients(records_dict)
 
@@ -647,10 +661,8 @@ def main_sub():
             # 患者判明数
             better_patients_summary_dict = conv_better_patients_summary_dict(records_dict, 'patients')
 
-            total_patients = 0
-            for k in better_patients_summary_dict:
-                total_patients = total_patients + int(better_patients_summary_dict[k])
-            
+            total_patients = gen_total_patients()
+                
             # 退院者数
             better_discharge_summary_dict = conv_better_patients_summary_dict(records_dict, 'discharge')
 
