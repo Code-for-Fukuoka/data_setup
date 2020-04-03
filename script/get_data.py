@@ -121,39 +121,106 @@ def gen_dummy_hotline():
     
     return(df)
 
-def gen_patients_summary():
+# 以下を期間として、patients_summaryの初期（値が0の）データフレームを生成
+# 　- 開始日：CKANから取得した検査実施数の開始日
+# 　- 終了日：data_setupを実行した日
+def gen_patients_df():
 
-    inspections_filename = DATA_DICT['resource']['inspections']['filename']
-    patients_filename = DATA_DICT['resource']['patients']['filename']
+    yobi = ["月","火","水","木","金","土","日"]
     
-    # load inspections.csv
+    patients_filename = DATA_DICT['resource']['patients']['filename']
+
+    df_patients_summary = pd.DataFrame(index=[],
+                                       columns=['No','全国地方公共団体コード','都道府県名','市区町村名','年月日','曜日','件数','備考','患者判明数','退院者数','死亡者数','軽症','中等症','重症'])
+
+    # CKANから取得した検査実施数のファイルを取得
+    inspections_filename = DATA_DICT['resource']['inspections']['filename']
     org_inspections_filename = ORG_ID + "_" + inspections_filename
     inspections_filepath = I_FILEPATH + "/" + org_inspections_filename
     df_inspections = pd.read_csv(inspections_filepath)
-    df_patients_summary = df_inspections
-    
-    # add column in inspections
-    df_patients_summary['患者判明数'] = 0
-    df_patients_summary['退院者数'] = 0
-    df_patients_summary['死亡者数'] = 0
-    df_patients_summary['軽症'] = 0
-    df_patients_summary['中等症'] = 0
-    df_patients_summary['重症'] = 0
 
-    # load inspections.csv
+    inspections_org_id = df_inspections['全国地方公共団体コード'][0]
+    inspections_pref_name = df_inspections['都道府県名'][0]
+    inspections_town_name = df_inspections['市区町村名'][0]
+    inspections_start_date = df_inspections['年月日'][0]
+    inspections_start_pdate = datetime.datetime.strptime(inspections_start_date, '%Y/%m/%d')
+    
+    # CKANから取得した陽性患者発表情報のファイルを読込み
+    patients_filename = DATA_DICT['resource']['patients']['filename']
     org_patients_filename = ORG_ID + "_" + patients_filename    
     patients_filepath = I_FILEPATH + "/" + org_patients_filename
     df_patients = pd.read_csv(patients_filepath)
 
-    # check for each patients info
+    """
+    patients_org_id = df_patients['全国地方公共団体コード'][0]
+    patients_pref_name = df_patients['都道府県名'][0]
+    patients_town_name = df_patients['市区町村名'][0]
+    patients_start_date = df_patients['公表_年月日'][0]
+    patients_start_pdate = datetime.datetime.strptime(patients_start_date, '%Y/%m/%d')
+    """
+
+    # find current date and month
+    now = datetime.datetime.now()
+    now_date = now.strftime('%Y/%m/%d')
+    now_pdate = datetime.datetime.strptime(now_date, '%Y/%m/%d')
+    end_pdate = now_pdate
+
+    count_pdate =  inspections_start_pdate
+
+    new_sr_list = []
+    
+    line_count = 0
+    while  end_pdate > count_pdate:
+
+        line_count = line_count + 1
+
+        count_pdate = count_pdate + datetime.timedelta(days=1)
+        count_date = count_pdate.strftime('%Y/%m/%d')
+
+        this_yobi = yobi[count_pdate.weekday()]
+
+        new_sr = pd.Series({
+            'No': line_count,
+            '全国地方公共団体コード': inspections_org_id,
+            '都道府県名': inspections_pref_name,
+            '市区町村名': inspections_town_name,
+            '年月日': count_date,
+            '曜日': this_yobi,
+            '件数': '',
+            '備考': '',
+            '患者判明数': 0,
+            '退院者数': 0,
+            '死亡者数': 0,
+            '軽症': 0,
+            '中等症': 0,
+            '重症': 0
+        })
+
+        df_patients_summary = df_patients_summary.append(new_sr, ignore_index=True)
+
+    return(df_patients_summary)
+    
+    
+def gen_patients_summary(df_patients_summary):
+
+    # CKANから取得した陽性患者発表情報のファイルを読込み
+    patients_filename = DATA_DICT['resource']['patients']['filename']
+    org_patients_filename = ORG_ID + "_" + patients_filename    
+    patients_filepath = I_FILEPATH + "/" + org_patients_filename
+    df_patients = pd.read_csv(patients_filepath)
+
+    # 陽性患者発表情報を１件ずつチェック
     for index, row in df_patients.iterrows():
         patients_date = row['公表_年月日']
-
-        # find patients in each inspection's day
+        patients_pdate = datetime.datetime.strptime( patients_date, '%Y/%m/%d')
+        
+        # 陽性患者者数の期間の日付に対し、陽性患者者発表情報の公表年月日を比較
+        # 一致する場合、陽性患者者数を１加算
         for index2, row2 in df_patients_summary.iterrows():
             summary_date = row2['年月日']
+            summary_pdate = datetime.datetime.strptime(summary_date, '%Y/%m/%d')
 
-            if summary_date == patients_date:
+            if summary_pdate == patients_pdate:
                 patients_num = df_patients_summary.loc[index2, '患者判明数']
                 df_patients_summary.loc[index2, '患者判明数'] = patients_num + 1
                 break
@@ -186,9 +253,14 @@ def get_resource_file(resource_dict):
                 
         elif format == "file":
             if f_title == "patients_summary":
-                # patients_summaryのデータをinspectionとpatientsの
-                # データから生成
-                df = gen_patients_summary()
+
+                # 1. 以下を期間として、patients_summaryのデータを生成
+                # 　- 開始日：CKANから取得した検査実施数の開始日
+                # 　- 終了日：data_setupを実行した日
+                # 2. 陽性患者発表情報をから、patients_summaryの患者者数
+                #   をカウント
+                df_patients_summary_init = gen_patients_df()
+                df = gen_patients_summary(df_patients_summary_init)
                 save_df(f_title, filename, df)
                 
             if f_title == "hotline":
