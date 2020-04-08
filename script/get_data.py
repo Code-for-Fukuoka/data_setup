@@ -145,6 +145,9 @@ def gen_patients_df():
     inspections_town_name = df_inspections['市区町村名'][0]
     inspections_start_date = df_inspections['年月日'][0]
     inspections_start_pdate = datetime.datetime.strptime(inspections_start_date, '%Y/%m/%d')
+
+    inspections_last_date = df_inspections['年月日'][len(df_inspections)-1]
+    inspections_last_pdate = datetime.datetime.strptime(inspections_last_date, '%Y/%m/%d')
     
     # CKANから取得した陽性患者発表情報のファイルを読込み
     patients_filename = DATA_DICT['resource']['patients']['filename']
@@ -160,11 +163,18 @@ def gen_patients_df():
     patients_start_pdate = datetime.datetime.strptime(patients_start_date, '%Y/%m/%d')
     """
 
+    patients_last_date = df_patients['公表_年月日'][len(df_patients)-1]
+    patients_last_pdate = datetime.datetime.strptime(patients_last_date, '%Y/%m/%d')
+    
     # find current date and month
     now = datetime.datetime.now()
     now_date = now.strftime('%Y/%m/%d')
     now_pdate = datetime.datetime.strptime(now_date, '%Y/%m/%d')
-    end_pdate = now_pdate
+
+    if patients_last_pdate > inspections_last_pdate:
+        end_pdate = patients_last_pdate
+    else:
+        end_pdate = inspections_last_pdate
 
     count_pdate =  inspections_start_pdate
 
