@@ -30,16 +30,3 @@ echo "${SPATH}/merge_json.py"
 echo "sed 's/\\\\/\\/g' ${OPATH}/data_new.json > ${OPATH}/data.json"
       sed 's/\\\\/\\/g' ${OPATH}/data_new.json > ${OPATH}/data.json
 
-# to master
-
-echo "cp ${OPATH}/data.json ${MPATH}/data/data.json"
-      cp ${OPATH}/data.json ${MPATH}/data/data.json
-
-echo "cd ${MPATH}"
-      cd ${MPATH}
-
-echo "yarn build"
-      yarn build
-
-echo "systemctl restart fukuoka-pref"
-      systemctl restart fukuoka-pref
