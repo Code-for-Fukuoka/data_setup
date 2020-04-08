@@ -340,8 +340,7 @@ def gen_main_summary(total_visit,
                         },
                         {
                             "attr": "死亡",
-                            # "value": total_died
-                            "value": '-'
+                            "value": total_died
                         }
                     ]
                 }
@@ -473,6 +472,17 @@ def gen_total_patients():
         
     return(total_patients)
 
+def load_input_file(filename):
+
+    org_filename = ORG_ID + "_" + filename
+    file_path = I_FILEPATH + "/" + org_filename
+
+    print("load:", org_filename)
+        
+    df = pd.read_csv(file_path)
+    
+    return(df)
+
 def main_sub():
 
     now = datetime.datetime.now()
@@ -481,248 +491,297 @@ def main_sub():
 
     for f_title in DATA_DICT['resource']:
         
-        filename = DATA_DICT['resource'][f_title]["filename"]
-        type = DATA_DICT['resource'][f_title]["type"]
-        org_filename = ORG_ID + "_" + filename
-        file_path = I_FILEPATH + "/" + org_filename
-
-        print("load:", org_filename)
-        
-        df = pd.read_csv(file_path)
+        filename = DATA_DICT['resource'][f_title]['filename']
+        type = DATA_DICT['resource'][f_title]['type']
+        use = DATA_DICT['resource'][f_title]['use']
         
         if f_title == "hotline":
 
-            data_title = "contacts"
-            
-            df_fill = df.fillna({'件数':0})
-            records_dict = df_fill.to_dict(orient='records')
-            hotline_list = conv_hotline(records_dict)
-
-            if type == 'url':
-                hotline_date = PACKAGE_DICT["hotline"]["resources"][0]["last_modified"]
-            else:
-                hotline_date = "2020-01-01T00:00:00.000000"
+            if use == 'True':
                 
-            hotline_date_str = conv_time(hotline_date)
+                data_title = "contacts"
             
-            hotline_dict = {
-                data_title : {
-                    "date" : hotline_date_str,
-                    "data" : hotline_list
-                }
-            }
+                df = load_input_file(filename)
+                df_fill = df.fillna({'件数':0})
+                records_dict = df_fill.to_dict(orient='records')
+                hotline_list = conv_hotline(records_dict)
 
-            filename = data_title + ".json"
-            output_json(O_FILEPATH, filename, hotline_dict)
+                if type == 'url':
+                    hotline_date = PACKAGE_DICT["hotline"]["resources"][0]["last_modified"]
+                else:
+                    hotline_date = "2020-01-01T00:00:00.000000"
+                
+                hotline_date_str = conv_time(hotline_date)
+            
+                hotline_dict = {
+                    data_title : {
+                        "date" : hotline_date_str,
+                        "data" : hotline_list
+                    }
+                }
+
+                filename = data_title + ".json"
+                output_json(O_FILEPATH, filename, hotline_dict)
             
         elif f_title == "visit":
 
-            data_title = "querents"
+            if use == 'True':
+                data_title = "querents"
             
-            df_fill = df.fillna({'件数':0})
-            records_dict = df_fill.to_dict(orient='records')
-            visit_list = conv_visit(records_dict)
+                df = load_input_file(filename)
+                df_fill = df.fillna({'件数':0})
+                records_dict = df_fill.to_dict(orient='records')
+                visit_list = conv_visit(records_dict)
 
-            if type == 'url':
-                visit_date = PACKAGE_DICT["visit"]["resources"][0]["last_modified"]
-            else:
-                visit_date = "2020-01-01T00:00:00.000000"
+                if type == 'url':
+                    visit_date = PACKAGE_DICT["visit"]["resources"][0]["last_modified"]
+                else:
+                    visit_date = "2020-01-01T00:00:00.000000"
             
-            visit_date_str = conv_time(visit_date)
+                visit_date_str = conv_time(visit_date)
             
-            visit_dict = {
-                data_title : {                
-                    "date" : visit_date_str,
-                    "data" : visit_list
+                visit_dict = {
+                    data_title : {                
+                        "date" : visit_date_str,
+                        "data" : visit_list
+                    }
                 }
-            }
             
-            total_visit = 0
-            for d in visit_list:
-                total_visit = total_visit + int(d['小計'])
+                total_visit = 0
+                for d in visit_list:
+                    total_visit = total_visit + int(d['小計'])
             
-            filename = data_title + ".json"
-            output_json(O_FILEPATH, filename, visit_dict)
+                filename = data_title + ".json"
+                output_json(O_FILEPATH, filename, visit_dict)
 
             
         elif f_title == "patients":
 
-            data_title = f_title
+            if use == 'True':
+                data_title = f_title
             
-            df_fill = df.fillna({'退院済フラグ':0})
+                df = load_input_file(filename)
+                df_fill = df.fillna({'退院済フラグ':0})
 
-            records_dict = df_fill.to_dict(orient='records')
-            patients_list = conv_patients(records_dict)
+                records_dict = df_fill.to_dict(orient='records')
+                patients_list = conv_patients(records_dict)
 
-            if type == 'url':
-                patients_date = PACKAGE_DICT["patients"]["resources"][0]["last_modified"]
-            else:
-                patients_date = "2020-01-01T00:00:00.000000"
-            patients_date_str = conv_time(patients_date)
+                if type == 'url':
+                    patients_date = PACKAGE_DICT["patients"]["resources"][0]["last_modified"]
+                else:
+                    patients_date = "2020-01-01T00:00:00.000000"
+                patients_date_str = conv_time(patients_date)
             
-            patients_dict = {
-                data_title : {                
-                    "date" : patients_date_str,
-                    "data" : patients_list
+                patients_dict = {
+                    data_title : {                
+                        "date" : patients_date_str,
+                        "data" : patients_list
+                    }
                 }
-            }
             
-            filename = data_title + ".json"
-            output_json(O_FILEPATH, filename, patients_dict)
+                filename = data_title + ".json"
+                output_json(O_FILEPATH, filename, patients_dict)
             
         elif f_title == "inspections":
 
-            data_title  = f_title
-            data_title2 = "tested"
-            data_title3 = "inspections_summary"
+            if use == 'True':
+                data_title  = f_title
+                data_title2 = "tested"
+                data_title3 = "inspections_summary"
             
-            df_fill = df.fillna({'件数':0})
-            records_dict = df_fill.to_dict(orient='records')
-            inspections_list = conv_inspections(records_dict)
-            tested_list = conv_tested(records_dict)
+                df = load_input_file(filename)
+                df_fill = df.fillna({'件数':0})
+                records_dict = df_fill.to_dict(orient='records')
+                inspections_list = conv_inspections(records_dict)
+                tested_list = conv_tested(records_dict)
 
-            if type == 'url':
-                inspections_date = PACKAGE_DICT["inspections"]["resources"][0]["last_modified"]
-            else:
-                inspections_date = "2020-01-01T00:00:00.000000"
-            inspections_date_str = conv_time(inspections_date)
+                if type == 'url':
+                    inspections_date = PACKAGE_DICT["inspections"]["resources"][0]["last_modified"]
+                else:
+                    inspections_date = "2020-01-01T00:00:00.000000"
+                inspections_date_str = conv_time(inspections_date)
             
-            inspections_dict = {
-                data_title : {                
-                    "date" : inspections_date_str,
-                    "data" : inspections_list
+                inspections_dict = {
+                    data_title : {                
+                        "date" : inspections_date_str,
+                        "data" : inspections_list
+                    }
                 }
-            }
 
-            tested_dict =  {
-                data_title2: {
-                    "date" : inspections_date_str,
-                    "data" : tested_list
+                tested_dict =  {
+                    data_title2: {
+                        "date" : inspections_date_str,
+                        "data" : tested_list
+                    }
                 }
-            }
             
-            filename = data_title + ".json"
-            output_json(O_FILEPATH, filename, inspections_dict)
+                filename = data_title + ".json"
+                output_json(O_FILEPATH, filename, inspections_dict)
 
-            filename = data_title2 + ".json"
-            output_json(O_FILEPATH, filename, tested_dict)
+                filename = data_title2 + ".json"
+                output_json(O_FILEPATH, filename, tested_dict)
 
             
-            total_inspections = 0
-            for d in inspections_list:
-                total_inspections = total_inspections + int(d['検査検体数'])
+                total_inspections = 0
+                for d in inspections_list:
+                    total_inspections = total_inspections + int(d['検査検体数'])
             
-            (dict_sub, list_sub) = conv_inspections_summary(records_dict)
+                (dict_sub, list_sub) = conv_inspections_summary(records_dict)
 
-            inspections_summary_dict = {
-                data_title3: {
-                    "date" : inspections_date_str,
-                    "data" : dict_sub,
-                    "labels": list_sub
+                inspections_summary_dict = {
+                    data_title3: {
+                        "date" : inspections_date_str,
+                        "data" : dict_sub,
+                        "labels": list_sub
+                    }
                 }
-            }
             
-            filename = data_title3 + ".json"
-            output_json(O_FILEPATH, filename, inspections_summary_dict)
+                filename = data_title3 + ".json"
+                output_json(O_FILEPATH, filename, inspections_summary_dict)
             
         elif f_title == "patients_summary":
 
-            data_title  = f_title
-            data_title2 = "discharges_summary"
-            data_title3 = "better_patients_summary"
+            if use == 'True':
+                data_title  = f_title
+                data_title2 = "discharges_summary"
+                data_title3 = "better_patients_summary"
             
-            df_fill = df.fillna({'患者判明数':0, '退院者数':0, '死亡者数':0, '軽症':0, '中等症':0, '重症':0})
-            records_dict = df_fill.to_dict(orient='records')
+                df = load_input_file(filename)
+                df_fill = df.fillna({'患者判明数':0,
+                                     '退院者数':0,
+                                     '死亡者数':0,
+                                     '軽症':0,
+                                     '中等症':0,
+                                     '重症':0})
             
-            # patients_summary（患者判明数）
-            patients_summary_list = conv_patients_summary_list(records_dict, 'patients')
-            patients_summary_dict = {
-                data_title : {
-                    "date" : now_date,
-                    "data" : patients_summary_list
-                }
-            }
-
-            filename = data_title + ".json"
-            output_json(O_FILEPATH, filename, patients_summary_dict)
+                records_dict = df_fill.to_dict(orient='records')
             
-            # discharges_summary（退院者数）
-            discharge_summary_list = conv_patients_summary_list(records_dict, 'discharge')
-            discharge_summary_dict = {
-                data_title2: {
-                    "date" : now_date,
-                    "data" : discharge_summary_list
-                }
-            }
-            
-            filename = data_title2 + ".json"
-            output_json(O_FILEPATH, filename, discharge_summary_dict)
-            
-            # 患者判明数
-            better_patients_summary_dict = conv_better_patients_summary_dict(records_dict, 'patients')
-
-            total_patients = gen_total_patients()
-                
-            # 退院者数
-            better_discharge_summary_dict = conv_better_patients_summary_dict(records_dict, 'discharge')
-
-            total_discharge = gen_total_discharge()
-
-            """
-            total_discharge = 0
-            for k in better_discharge_summary_dict:
-                total_discharge = total_discharge + int(better_discharge_summary_dict[k])
-            """
-            
-            # 死亡
-            better_died_summary_dict = conv_better_patients_summary_dict(records_dict, 'died')
-            
-            total_died = 0
-            for k in better_died_summary_dict:
-                total_died = total_died + int(better_died_summary_dict[k])
-            
-            # 軽症
-            better_mild_summary_dict = conv_better_patients_summary_dict(records_dict, 'mild')
-
-            total_mild = 0
-            for k in better_mild_summary_dict:
-                total_mild = total_mild + int(better_mild_summary_dict[k])
-            
-            # 中等症
-            better_medium_summary_dict = conv_better_patients_summary_dict(records_dict, 'medium')
-            
-            total_medium = 0
-            for k in better_medium_summary_dict:
-                total_medium = total_medium + int(better_medium_summary_dict[k])
-            
-            # 重症
-            better_heavy_summary_dict = conv_better_patients_summary_dict(records_dict, 'heavy')
-
-            total_heavy = 0
-            for k in better_heavy_summary_dict:
-                total_heavy = total_heavy + int(better_heavy_summary_dict[k])
-            
-            # better_patients_summary
-            all_better_patients_summary_dict = {
-                data_title3: {
-                    "date" : now_date,
-                    "data" : {
-                        "感染者数": better_patients_summary_dict,
-                        "退院者数": better_discharge_summary_dict,
-                        "死亡者数": better_died_summary_dict,
-                        "軽症": better_mild_summary_dict,
-                        "中等症": better_medium_summary_dict,
-                        "重症": better_heavy_summary_dict
+                # patients_summary（患者判明数）
+                patients_summary_list = conv_patients_summary_list(records_dict, 'patients')
+                patients_summary_dict = {
+                    data_title : {
+                        "date" : now_date,
+                        "data" : patients_summary_list
                     }
                 }
-            }
+
+                filename = data_title + ".json"
+                output_json(O_FILEPATH, filename, patients_summary_dict)
             
-            filename = data_title3 + ".json"
-            output_json(O_FILEPATH, filename, all_better_patients_summary_dict)
+                # discharges_summary（退院者数）
+                discharge_summary_list = conv_patients_summary_list(records_dict, 'discharge')
+                discharge_summary_dict = {
+                    data_title2: {
+                        "date" : now_date,
+                        "data" : discharge_summary_list
+                    }
+                }
             
+                filename = data_title2 + ".json"
+                output_json(O_FILEPATH, filename, discharge_summary_dict)
+            
+                # 患者判明数
+                better_patients_summary_dict = conv_better_patients_summary_dict(records_dict, 'patients')
+
+                total_patients = gen_total_patients()
+                
+                # 退院者数
+                better_discharge_summary_dict = conv_better_patients_summary_dict(records_dict, 'discharge')
+
+                total_discharge = gen_total_discharge()
+
+                """
+                total_discharge = 0
+                for k in better_discharge_summary_dict:
+                    total_discharge = total_discharge + int(better_discharge_summary_dict[k])
+                """
+            
+                # 死亡者数(dummy data)
+                better_died_summary_dict = conv_better_patients_summary_dict(records_dict, 'died')
+
+                """
+                total_died = 0
+                for k in better_died_summary_dict:
+                    total_died = total_died + int(better_died_summary_dict[k])
+                """
+                
+                # 軽症
+                better_mild_summary_dict = conv_better_patients_summary_dict(records_dict, 'mild')
+
+                total_mild = 0
+                for k in better_mild_summary_dict:
+                    total_mild = total_mild + int(better_mild_summary_dict[k])
+            
+                # 中等症
+                better_medium_summary_dict = conv_better_patients_summary_dict(records_dict, 'medium')
+            
+                total_medium = 0
+                for k in better_medium_summary_dict:
+                    total_medium = total_medium + int(better_medium_summary_dict[k])
+            
+                # 重症
+                better_heavy_summary_dict = conv_better_patients_summary_dict(records_dict, 'heavy')
+
+                total_heavy = 0
+                for k in better_heavy_summary_dict:
+                    total_heavy = total_heavy + int(better_heavy_summary_dict[k])
+            
+                # better_patients_summary
+                all_better_patients_summary_dict = {
+                    data_title3: {
+                        "date" : now_date,
+                        "data" : {
+                            "感染者数": better_patients_summary_dict,
+                            "退院者数": better_discharge_summary_dict,
+                            "死亡者数": better_died_summary_dict,
+                            "軽症": better_mild_summary_dict,
+                            "中等症": better_medium_summary_dict,
+                            "重症": better_heavy_summary_dict
+                        }
+                    }
+                }
+            
+                filename = data_title3 + ".json"
+                output_json(O_FILEPATH, filename, all_better_patients_summary_dict)
+
+
+        elif f_title == "patients_status":
+            
+            if use == 'True':
+
+                df = load_input_file(filename)
+                df_fill = df.fillna({'件数':0})
+                df_patients = df_fill
+
+                latest_date_p = datetime.datetime.strptime('2020/03/01', "%Y/%m/%d")
+                latest_index = 0
+                latest_patients = 0
+                latest_hospitalized = 0
+                latest_died = 0
+                latest_discharged = 0
+                
+                for index, row in df_patients.iterrows():
+
+                    date_str = row['公表_年月日']
+                    date_p = datetime.datetime.strptime(date_str, "%Y/%m/%d")
+                    if date_p > latest_date_p:
+                        latest_date_p = date_p
+                        latest_index = index
+                        latest_patients = row['陽性患者数累計']
+                        latest_hospitalized = row['入院者数累計']
+                        latest_died = row['死亡者数累計']
+                        latest_discharged = row['退院者数累計']
+
+                total_died = latest_died
+
+            else:
+                total_died = '-'
+                
         else:
-            print("wrong title")
-            exit()
+
+            if use == 'True':
+                print("wrong title")
+                exit()
 
     gen_main_summary(total_visit,
                      total_patients,

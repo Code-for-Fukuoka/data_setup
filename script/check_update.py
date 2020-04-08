@@ -19,6 +19,7 @@ import http.client
 import requests
 import io
 import chardet
+from datetime import datetime as dt
 
 """ defs
 """
@@ -67,26 +68,52 @@ def get_package_data():
     
     for f_title in DATA_DICT['resource']:
         type = DATA_DICT['resource'][f_title]['type']
+        use = DATA_DICT['resource'][f_title]['use']
         dataset = DATA_DICT['resource'][f_title]['dataset']
 
         api_com = 'package_show' + '?id=' + dataset
         url = BASE_URL + '/api/3/action/' + api_com
 
-        if type == "url":
+        if type == "url" and use == 'True':
             resp_dict = call_api(url)
             ckan_dict[f_title] = resp_dict
             resource_dict[f_title] = resp_dict['result']
 
     return(resource_dict)
 
+
+def conv_time(package_date):
+
+    pd = package_date.split('.')
+
+    td = dt.strptime(pd[0], '%Y-%m-%dT%H:%M:%S')
+    td_jpn = td + datetime.timedelta(hours=9)
+    td_jpn_str = td_jpn.strftime('%Y-%m-%dT%H:%M:%S')
+    
+    td_jpn_str_sep = td_jpn_str.split('T')
+    td_date = td_jpn_str_sep[0]
+    td_time = td_jpn_str_sep[1]
+    
+    hour = td_time.split(':')[0]
+    min  = td_time.split(':')[1]
+    sec  = td_time.split(':')[2]
+
+    datetime_str = td_date + " " + hour + ":" + min
+    
+    return(datetime_str)
+
 def show_package_info(resource_dict):
 
     for f_title in DATA_DICT['resource']:
         format = DATA_DICT['resource'][f_title]['type']
+        use = DATA_DICT['resource'][f_title]['use']
 
-        if format == "url":
+        if format == "url" and use == 'True':
             last_modified = resource_dict[f_title]["resources"][0]["last_modified"]
-            dateandtime = last_modified.replace('T', ' ')
+
+            last_modified_jpn = conv_time(last_modified)
+            
+            dateandtime = last_modified_jpn.replace('T', ' ')
             
             print("{0:12s} : {1}".format(f_title, dateandtime))
 

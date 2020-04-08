@@ -76,12 +76,13 @@ def get_package_data():
     
     for f_title in DATA_DICT['resource']:
         type = DATA_DICT['resource'][f_title]['type']
+        use = DATA_DICT['resource'][f_title]['use']
         dataset = DATA_DICT['resource'][f_title]['dataset']
 
         api_com = 'package_show' + '?id=' + dataset
         url = BASE_URL + '/api/3/action/' + api_com
 
-        if type == "url":
+        if type == 'url' and use == 'True':
             resp_dict = call_api(url)
             ckan_dict[f_title] = resp_dict
             resource_dict[f_title] = resp_dict['result']
@@ -240,35 +241,38 @@ def get_resource_file(resource_dict):
 
     for f_title in DATA_DICT['resource']:
         format = DATA_DICT['resource'][f_title]['type']
+        use = DATA_DICT['resource'][f_title]['use']
         dataset = DATA_DICT['resource'][f_title]['dataset']
         filename = DATA_DICT['resource'][f_title]['filename']
 
         if format == 'url':
-            url = resource_dict[f_title]['resources'][0]['url']
-            # リソースのcsvファイルを取得し、文字コードをutf8へ変換後
-            # dfに格納
-            df = get_resource(f_title, url)
-            # dfをcsvファイルに保存
-            save_df(f_title, filename, df)
+            if use == 'True':
+                url = resource_dict[f_title]['resources'][0]['url']
+                # リソースのcsvファイルを取得し、文字コードをutf8へ変換後
+                # dfに格納
+                df = get_resource(f_title, url)
+                # dfをcsvファイルに保存
+                save_df(f_title, filename, df)
                 
         elif format == "file":
-            if f_title == "patients_summary":
+            if use == 'True':
+                if f_title == "patients_summary":
 
-                # 1. 以下を期間として、patients_summaryのデータを生成
-                # 　- 開始日：CKANから取得した検査実施数の開始日
-                # 　- 終了日：data_setupを実行した日
-                # 2. 陽性患者発表情報をから、patients_summaryの患者者数
-                #   をカウント
-                df_patients_summary_init = gen_patients_df()
-                df = gen_patients_summary(df_patients_summary_init)
-                save_df(f_title, filename, df)
+                    # 1. 以下を期間として、patients_summaryのデータを生成
+                    # 　- 開始日：CKANから取得した検査実施数の開始日
+                    # 　- 終了日：data_setupを実行した日
+                    # 2. 陽性患者発表情報をから、patients_summaryの患者者数
+                    #   をカウント
+                    df_patients_summary_init = gen_patients_df()
+                    df = gen_patients_summary(df_patients_summary_init)
+                    save_df(f_title, filename, df)
                 
-            if f_title == "hotline":
-                # hotlineのダミーデータを生成
-                df = gen_dummy_hotline()
-                save_df(f_title, filename, df)
+                if f_title == "hotline":
+                    # hotlineのダミーデータを生成
+                    df = gen_dummy_hotline()
+                    save_df(f_title, filename, df)
         else:
-            print("wrong format")
+            print("wrong format:", "title=", f_title, "format=", format, "use=", use)
             exit()
             
     return()
@@ -277,8 +281,9 @@ def show_package_info(resource_dict):
 
     for f_title in DATA_DICT['resource']:
         format = DATA_DICT['resource'][f_title]['type']
+        use = DATA_DICT['resource'][f_title]['use']
 
-        if format == "url":
+        if format == 'url' and use == 'True':
             last_modified = resource_dict[f_title]["resources"][0]["last_modified"]
             print( f_title, last_modified)
 
