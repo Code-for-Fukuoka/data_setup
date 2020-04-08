@@ -133,7 +133,10 @@ if __name__ == '__main__':
     config.read('{}/../config.ini'.format(path), encoding="utf-8")
     config_section = 'development'
 
-    WORK_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../..')
+    WORK_DIR = os.path.dirname(os.path.abspath(__file__))
+    WORK_DIR = os.path.dirname(WORK_DIR)
+    TOOL_DIR = os.path.basename(WORK_DIR)
+    WORK_DIR = os.path.dirname(WORK_DIR)
 
     INPUT_DIR = config.get(config_section, 'INPUT_DIR')
     OUTPUT_DIR = config.get(config_section, 'OUTPUT_DIR')

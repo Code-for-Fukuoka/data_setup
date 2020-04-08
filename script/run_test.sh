@@ -3,9 +3,10 @@
 set -e
 
 WDIR=`dirname "$(realpath "$0")"`
-WDIR=${WDIR}/../..
+WDIR=`dirname ${WDIR}`
+TDIR=`basename ${WDIR}`
+WDIR=`dirname ${WDIR}`
 
-TDIR="data_setup"
 SDIR="script"
 IDIR="input_data"
 ODIR="gen_data"
