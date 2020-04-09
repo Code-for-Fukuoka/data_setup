@@ -171,11 +171,8 @@ def gen_patients_df():
     now_date = now.strftime('%Y/%m/%d')
     now_pdate = datetime.datetime.strptime(now_date, '%Y/%m/%d')
 
-    if patients_last_pdate > inspections_last_pdate:
-        end_pdate = patients_last_pdate
-    else:
-        end_pdate = inspections_last_pdate
-
+    end_pdate = patients_last_pdate
+    
     count_pdate =  inspections_start_pdate
 
     new_sr_list = []
