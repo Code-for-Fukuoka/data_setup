@@ -311,11 +311,22 @@ def gen_main_summary(total_visit,
     total_mild = patients_status['total_mild']
     total_medium = patients_status['total_medium']
     total_heavy = patients_status['total_heavy']
+
+    type = DATA_DICT['resource']['patients_status']['type']
+    use = DATA_DICT['resource']['patients_status']['use']
+    # date in main_summary
+    # if patients_status is available use its date, otherwise use patietsns's date
+    if type == 'url' and use == 'True':
+        patients_status_date = PACKAGE_DICT["patients_status"]["resources"][0]["last_modified"]
+    else:
+        patients_status_date = PACKAGE_DICT["patients"]["resources"][0]["last_modified"]
+    patients_status_date_str = conv_time(patients_status_date)
                      
     main_summary_dict = {
         data_title: {
             "attr": "検査実施人数",
             "value": total_inspections,
+            "date": patients_status_date_str,
             "children": [
                 {
                     "attr": "陽性患者数",
@@ -930,5 +941,5 @@ if __name__ == '__main__':
     org_package_file = ORG_ID + "_" + "package.json"
     package_file_path = I_FILEPATH + "/" + org_package_file
     PACKAGE_DICT = load_json_file(package_file_path)
-    
+
     main()
