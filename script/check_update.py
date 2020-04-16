@@ -105,7 +105,7 @@ def conv_time(package_date):
 
 def show_package_info(resource_dict):
 
-    print(RESOURCE_FILE)
+    print("{0:16s} : {1}".format("resource", RESOURCE_FILE))
     
     for f_title in DATA_DICT['resource']:
         format = DATA_DICT['resource'][f_title]['type']
@@ -118,7 +118,7 @@ def show_package_info(resource_dict):
             
             dateandtime = last_modified_jpn.replace('T', ' ')
             
-            print("{0:12s} : {1}".format(f_title, dateandtime))
+            print("{0:16s} : {1}".format(f_title, dateandtime))
 
     return()
 
