@@ -20,6 +20,7 @@ import requests
 import io
 import chardet
 from datetime import datetime as dt
+import argparse
 
 """ defs
 """
@@ -104,6 +105,8 @@ def conv_time(package_date):
 
 def show_package_info(resource_dict):
 
+    print(RESOURCE_FILE)
+    
     for f_title in DATA_DICT['resource']:
         format = DATA_DICT['resource'][f_title]['type']
         use = DATA_DICT['resource'][f_title]['use']
@@ -142,8 +145,6 @@ if __name__ == '__main__':
     OUTPUT_DIR = config.get(config_section, 'OUTPUT_DIR')
     RESOURCE_FILE = config.get(config_section, 'RESOURCE_FILE')
     
-    DEBUG = 1
-
     """
     hotline: 新型コロナコールセンター相談件数
     visit: 新型コロナ受診相談件数
@@ -151,9 +152,18 @@ if __name__ == '__main__':
     patients: 福岡市新型コロナ陽性患者発表情報
     """
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--resource")
+    args = parser.parse_args()
+
+    if args.resource != None:
+        RESOURCE_FILE = args.resource
+
     resource_file_path = WORK_DIR + "/" + TOOL_DIR + "/" + RESOURCE_FILE
     DATA_DICT = get_resource_file_dict(resource_file_path)
 
     BASE_URL = DATA_DICT['organization']['url']
-    
+        
+    DEBUG = 1
+
     main()
