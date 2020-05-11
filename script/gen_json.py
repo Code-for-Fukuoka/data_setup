@@ -407,7 +407,7 @@ def conv_inspections_summary(records_dict):
         inspections_summary_dict = {
             "福岡市": fukuoka_city_list,
             "北九州市": kitakyushu_city_list,
-            "福岡県（その他）": others_list
+            "福岡県※": others_list
         }
         
     else:
