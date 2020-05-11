@@ -374,7 +374,9 @@ def get_date_label(date):
     month = date_list[1]
     day = date_list[2]
 
-    date_label = day + '\/' + month
+    # date_label = day + '\/' + month
+    # date_label = day + '/' + month
+    date_label = month + '/' + day
     
     return(date_label)
 
