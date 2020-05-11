@@ -381,22 +381,50 @@ def get_date_label(date):
 def conv_inspections_summary(records_dict):
 
     city_list = []
+    fukuoka_city_list = []
+    kitakyushu_city_list = []
     others_list = []
     label_list = []
 
-    for record in records_dict:
-        num = int(float(record['件数']))
-        date = record['年月日']
-        date_label = get_date_label(date)
+    if ORG_ID == "400009":
+    
+        for record in records_dict:
 
-        city_list.append(num)
-        others_list.append(0)
-        label_list.append(date_label)
+            num = int(float(record['件数']))
+            num_fukuoka_city = int(float(record['福岡市']))
+            num_kitakyushu_city = int(float(record['北九州市']))
+            num_others = int(float(record['福岡県']))
+        
+            date = record['年月日']
+            date_label = get_date_label(date)
 
-    inspections_summary_dict = {
-        "市内": city_list,
-        "その他": others_list
-    }
+            city_list.append(num)
+            fukuoka_city_list.append(num_fukuoka_city)
+            kitakyushu_city_list.append(num_kitakyushu_city)
+            others_list.append(num_others)
+            label_list.append(date_label)
+            
+        inspections_summary_dict = {
+            "福岡市": fukuoka_city_list,
+            "北九州市": kitakyushu_city_list,
+            "福岡県（その他）": others_list
+        }
+        
+    else:
+
+        for record in records_dict:
+            num = int(float(record['件数']))
+            date = record['年月日']
+            date_label = get_date_label(date)
+
+            city_list.append(num)
+            others_list.append(0)
+            label_list.append(date_label)
+
+        inspections_summary_dict = {
+            "市内": city_list,
+            "その他": others_list
+        }
     
     return(inspections_summary_dict, label_list)
 
@@ -612,7 +640,12 @@ def gen_inspections():
     data_title3 = "inspections_summary"
             
     df = load_input_file(filename)
-    df_fill = df.fillna({'件数':0})
+
+    if ORG_ID == '400009':
+        df_fill = df.fillna({'件数':0, '福岡県':0, '福岡市':0, '北九州市':0})
+    else:
+        df_fill = df.fillna({'件数':0})
+    
     records_dict = df_fill.to_dict(orient='records')
     inspections_list = conv_inspections(records_dict)
     tested_list = conv_tested(records_dict)
