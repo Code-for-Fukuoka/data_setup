@@ -7,8 +7,8 @@
 	"patients_status" : {
 	    "title" : "検査陽性者の状況",
 	    "type" : "url",
-	    "use" : "False",
-	    "dataset": "",
+	    "use" : "True",
+	    "dataset": "401307_covid19_totalpatients",
 	    "filename": "patients_status.csv"
 	},
 	"visit" : {
