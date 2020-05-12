@@ -134,6 +134,22 @@ def gen_patients_df():
     df_patients_summary = pd.DataFrame(index=[],
                                        columns=['No','全国地方公共団体コード','都道府県名','市区町村名','年月日','曜日','件数','備考','患者判明数','退院者数','死亡者数','軽症','中等症','重症'])
 
+    # CKANから取得した検査陽性者の状況のファイルを読み込み
+
+    use_patients_status = DATA_DICT['resource']['patients_status']['use']
+
+    if use_patients_status == 'True':
+    
+        patients_status_filename = DATA_DICT['resource']['patients_status']['filename']
+        org_patients_status_filename = ORG_ID + "_" + patients_status_filename
+        patients_status_filepath = I_FILEPATH + "/" + org_patients_status_filename
+        df_patients_status = pd.read_csv(patients_status_filepath)
+
+        for index, row in df_patients_status.iterrows():
+            patients_status_date = row['公表_年月日']
+        
+        patients_status_pdate= datetime.datetime.strptime( patients_status_date, '%Y/%m/%d')
+    
     # CKANから取得した検査実施数のファイルを取得
     inspections_filename = DATA_DICT['resource']['inspections']['filename']
     org_inspections_filename = ORG_ID + "_" + inspections_filename
@@ -171,7 +187,10 @@ def gen_patients_df():
     now_date = now.strftime('%Y/%m/%d')
     now_pdate = datetime.datetime.strptime(now_date, '%Y/%m/%d')
 
-    end_pdate = patients_last_pdate
+    if use_patients_status == 'True':
+        end_pdate = patients_status_pdate
+    else:
+        end_pdate = patients_last_pdate
     
     count_pdate =  inspections_start_pdate
 

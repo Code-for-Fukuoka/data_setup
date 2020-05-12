@@ -4,6 +4,13 @@
 	"url" : "https://ckan.open-governmentdata.org"
     },
     "resource" : {
+	"patients_status" : {
+	    "title" : "検査陽性者の状況",
+	    "type" : "url",
+	    "use" : "True",
+	    "dataset": "401000_pref_fukuoka_covid19_totalpatients",
+	    "filename": "patients_status.csv"
+	},
 	"visit" : {
 	    "title" : "相談センター相談件数",
 	    "type" : "url",
@@ -38,13 +45,6 @@
 	    "use" : "True",
 	    "dataset": "",
 	    "filename": "patients_summary.csv"
-	},
-	"patients_status" : {
-	    "title" : "検査陽性者の状況",
-	    "type" : "url",
-	    "use" : "True",
-	    "dataset": "401000_pref_fukuoka_covid19_totalpatients",
-	    "filename": "patients_status.csv"
 	}
     }
 }
