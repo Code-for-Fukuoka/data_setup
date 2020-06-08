@@ -200,10 +200,10 @@ def conv_tested(records_dict):
     
     return(records_list)
 
-def conv_patients(records_dict):
+def conv_patients(records_dict, infection_route_info):
     
     records_list = []
-    
+
     for record in records_dict:
         date = record['公表_年月日']
         dayofweek = record['曜日']
@@ -214,7 +214,18 @@ def conv_patients(records_dict):
             discharge = '○'
         else: 
             discharge = ''
-           
+
+        if infection_route_info:
+            if record['感染経路不明'] == 1:
+                infection_route = '感染経路不明'
+            elif record['濃厚接触者'] == 1:
+                infection_route = '濃厚接触者'
+            elif record['海外渡航歴有'] == 1:
+                infection_route = '海外渡航歴有'
+            else:
+                infection_route = ''
+        else:
+                infection_route = ''
 
         # make Number of Week
         numofweek = get_numofweek(dayofweek)
@@ -229,6 +240,10 @@ def conv_patients(records_dict):
         record_dict["年代"] = age
         record_dict["性別"] = sex
         record_dict["退院"] = discharge
+        
+        if infection_route_info:
+            record_dict["感染経路"] = infection_route
+            
         record_dict["date"] = date 
 
         records_list.append(record_dict)
@@ -610,7 +625,13 @@ def gen_patients():
     df_fill = df.fillna({'退院済フラグ':0})
 
     records_dict = df_fill.to_dict(orient='records')
-    patients_list = conv_patients(records_dict)
+
+    if '感染経路不明' in df_fill and '濃厚接触者' in df_fill and '海外渡航歴有' in df_fill:
+        infection_route_info = True
+    else:
+        infection_route_info = False
+    
+    patients_list = conv_patients(records_dict, infection_route_info)
 
     if type == 'url':
         patients_date = PACKAGE_DICT["patients"]["resources"][0]["last_modified"]
