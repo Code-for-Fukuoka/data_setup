@@ -19,6 +19,8 @@ import http.client
 import requests
 import io
 import chardet
+import math
+
 from datetime import datetime as dt
 
 """ defs
@@ -207,7 +209,13 @@ def conv_patients(records_dict, infection_route_info):
     for record in records_dict:
         date = record['公表_年月日']
         dayofweek = record['曜日']
-        residence = record['居住地']
+
+        if type(record['居住地']) is float:
+            if math.isnan(record['居住地']):
+                residence = '調査中'
+        else:
+            residence = record['居住地']
+            
         age = record['年代']
         sex = record['性別']
         if record['退院済フラグ'] == 1:
