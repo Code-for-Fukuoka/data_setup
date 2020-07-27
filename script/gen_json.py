@@ -20,6 +20,7 @@ import requests
 import io
 import chardet
 import math
+import re
 
 from datetime import datetime as dt
 
@@ -206,7 +207,11 @@ def conv_patients(records_dict, infection_route_info):
     
     records_list = []
 
+    record_count = 0
     for record in records_dict:
+
+        record_count += 1
+        
         date = record['公表_年月日']
         dayofweek = record['曜日']
 
@@ -217,6 +222,30 @@ def conv_patients(records_dict, infection_route_info):
             residence = record['居住地']
             
         age = record['年代']
+        ageOrg = age
+
+        # collect invalid age input
+        if re.match(r'1[a-zA-Z0-9]代未満', age):
+            age = '10代未満'
+        elif re.match(r'1[a-zA-Z0-9]代', age):
+            age = '10代'
+        elif re.match(r'2[a-zA-Z0-9]代', age):
+            age = '20代'
+        elif re.match(r'3[a-zA-Z0-9]代', age):
+            age = '30代'
+        elif re.match(r'4[a-zA-Z0-9]代', age):
+            age = '40代'
+        elif re.match(r'5[a-zA-Z0-9]代', age):
+            age = '50代'
+        elif re.match(r'6[a-zA-Z0-9]代', age):
+            age = '60代'
+        elif re.match(r'7[a-zA-Z0-9]代', age):
+            age = '70代'
+        elif re.match(r'8[a-zA-Z0-9]代', age):
+            age = '80代'
+        elif re.match(r'9[a-zA-Z0-9]代', age):
+            age = '90代'
+        
         sex = record['性別']
         if record['退院済フラグ'] == 1:
             discharge = '○'
