@@ -265,7 +265,7 @@ def find_area(residence):
                 area = city
                 break
     else:
-        area = 'それ以外'
+        area = '県外：'+residence
     
     return(area)
 
