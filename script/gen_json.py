@@ -214,9 +214,47 @@ def find_area(residence):
     elif re.match('海外', residence):
         area = '海外'
     elif re.match('福岡市', residence):
-        area = '福岡市'
+        
+        residence_int = residence.replace('福岡市', '')
+
+        if re.match('博多区', residence_int):
+            area = '福岡市博多区'
+        elif re.match('西区', residence_int):
+            area = '福岡市西区'
+        elif re.match('東区', residence_int):
+            area = '福岡市東区'
+        elif re.match('中央区', residence_int):
+            area = '福岡市中央区'
+        elif re.match('早良区', residence_int):
+            area = '福岡市早良区'
+        elif re.match('城南区', residence_int):
+            area = '福岡市城南区'
+        elif re.match('南区', residence_int):
+            area = '福岡市南区'
+        else:
+            area = '福岡市内'
+            
     elif re.match('北九州市', residence):
-        area = '北九州市'
+
+        residence_int = residence.replace('北九州市', '')
+        
+        if re.match('門司区', residence_int):
+            area = '北九州市門司区'
+        elif re.match('若松区', residence_int):
+            area = '北九州市若松区'
+        elif re.match('戸畑区', residence_int):
+            area = '北九州市戸畑区'
+        elif re.match('小倉北区', residence_int):
+            area = '北九州市小倉北区'
+        elif re.match('小倉南区', residence_int):
+            area = '北九州市小倉南区'
+        elif re.match('八幡東区', residence_int):
+            area = '北九州市八幡東区'
+        elif re.match('八幡西区', residence_int):
+            area = '北九州市八幡西区'
+        else:
+            area = '北九州市内'
+        
     elif re.match('久留米市', residence):
         area = '久留米市'
     elif re.match('福岡県', residence):
@@ -305,8 +343,9 @@ def conv_patients(records_dict, infection_route_info):
         record_dict= {}
         record_dict["リリース日"] = dateandtime
         record_dict["曜日"] = 0
-        record_dict["居住地"] = residence
-        record_dict["地域"] = area
+        # record_dict["居住地"] = residence
+        record_dict["居住地"] = area
+        # record_dict["地域"] = area
         record_dict["年代"] = age
         record_dict["性別"] = sex
         record_dict["退院"] = discharge
