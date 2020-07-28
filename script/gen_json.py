@@ -203,6 +203,34 @@ def conv_tested(records_dict):
     
     return(records_list)
 
+def find_area(residence):
+
+    area = ''
+    
+    if re.match('調査中', residence):
+        area = '調査中'
+    elif re.match('確認中', residence):
+        area = '調査中'
+    elif re.match('海外', residence):
+        area = '海外'
+    elif re.match('福岡市', residence):
+        area = '福岡市'
+    elif re.match('北九州市', residence):
+        area = '北九州市'
+    elif re.match('久留米市', residence):
+        area = '久留米市'
+    elif re.match('福岡県', residence):
+        area = '福岡県'
+    elif residence in CITY_LIST:
+        for city in CITY_LIST:
+            if residence == city:
+                area = city
+                break
+    else:
+        area = 'それ以外'
+    
+    return(area)
+
 def conv_patients(records_dict, infection_route_info):
     
     records_list = []
@@ -220,6 +248,10 @@ def conv_patients(records_dict, infection_route_info):
                 residence = '調査中'
         else:
             residence = record['居住地']
+
+        area = find_area(residence)
+
+        # print ('P0:', record_count, area, residence)
             
         age = record['年代']
         ageOrg = age
@@ -274,6 +306,7 @@ def conv_patients(records_dict, infection_route_info):
         record_dict["リリース日"] = dateandtime
         record_dict["曜日"] = 0
         record_dict["居住地"] = residence
+        record_dict["地域"] = area
         record_dict["年代"] = age
         record_dict["性別"] = sex
         record_dict["退院"] = discharge
@@ -992,6 +1025,19 @@ def main_sub():
         
     return()
 
+def load_city_list(city_list_file_path):
+    
+    df = pd.read_csv(city_list_file_path)
+
+    city_list = []
+
+    for index, row in df.iterrows():
+
+        city_name = row['town']
+        city_list.append(city_name)
+
+    return(city_list)
+
 def main():
 
     main_sub()
@@ -1034,5 +1080,8 @@ if __name__ == '__main__':
     org_package_file = ORG_ID + "_" + "package.json"
     package_file_path = I_FILEPATH + "/" + org_package_file
     PACKAGE_DICT = load_json_file(package_file_path)
+
+    city_list_file_path = WORK_DIR + "/" + TOOL_DIR + "/" + "script/000618153.csv"
+    CITY_LIST = load_city_list(city_list_file_path)
 
     main()
