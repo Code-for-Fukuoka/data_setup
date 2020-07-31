@@ -236,8 +236,11 @@ def gen_patients_summary(df_patients_summary):
     patients_filepath = I_FILEPATH + "/" + org_patients_filename
     df_patients = pd.read_csv(patients_filepath)
 
+    df_patients = df_patients.dropna(subset=['全国地方公共団体コード'])
+    
     # 陽性患者発表情報を１件ずつチェック
     for index, row in df_patients.iterrows():
+
         patients_date = row['公表_年月日']
         patients_pdate = datetime.datetime.strptime( patients_date, '%Y/%m/%d')
         
