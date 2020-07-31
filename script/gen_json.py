@@ -731,6 +731,11 @@ def gen_patients():
     data_title = f_title
 
     df = load_input_file(filename)
+
+    # 空白行の削除に対応
+    # 　全国地方公共団体コードが空白の場合に削除
+    df = df.dropna(subset=['全国地方公共団体コード'])
+    
     df_fill = df.fillna({'退院済フラグ':0})
 
     records_dict = df_fill.to_dict(orient='records')
