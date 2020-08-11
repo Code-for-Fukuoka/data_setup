@@ -289,8 +289,6 @@ def conv_patients(records_dict, infection_route_info):
 
         area = find_area(residence)
 
-        # print ('P0:', record_count, area, residence)
-            
         age = record['年代']
         ageOrg = age
 
@@ -315,12 +313,11 @@ def conv_patients(records_dict, infection_route_info):
             age = '80代'
         elif re.match(r'9[a-zA-Z0-9]代', age):
             age = '90代'
-        elif re.match(r'-', age):
+        elif re.search(r'-|‐', age):
             age = '調査中'
-            
         
         sex = record['性別']
-        if re.match(r'-', sex):
+        if re.search(r'-|‐', sex):
             sex = '調査中'
         
         if record['退院済フラグ'] == 1:
