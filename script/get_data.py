@@ -107,8 +107,12 @@ def get_resource(f_title, url):
         # print("P2", encoding)
         res = urllib.request.urlopen(url)
         res = res.read().decode('utf-8-sig')
-    else:
+    elif encoding == 'utf-8':
         # print("P3", encoding)
+        res = urllib.request.urlopen(url)
+        res = res.read().decode('utf-8')
+    else:
+        # print("P4", encoding)
         res = urllib.request.urlopen(url)
         res = res.read()
     
