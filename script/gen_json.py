@@ -313,6 +313,8 @@ def conv_patients(records_dict, infection_route_info):
             age = '80代'
         elif re.match(r'9[a-zA-Z0-9]代', age):
             age = '90代'
+        elif re.match(r'9[a-zA-Z0-9]歳以上', age):
+            age = '90代'            
         elif re.search(r'-|‐', age):
             age = '調査中'
         
