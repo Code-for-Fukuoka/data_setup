@@ -513,16 +513,22 @@ def conv_inspections_summary(records_dict):
     fukuoka_city_list = []
     kitakyushu_city_list = []
     others_list = []
+    private_list = []
     label_list = []
 
     if ORG_ID == "400009":
-    
+
         for record in records_dict:
 
             num = int(float(record['件数']))
             num_fukuoka_city = int(float(record['福岡市']))
             num_kitakyushu_city = int(float(record['北九州市']))
             num_others = int(float(record['福岡県']))
+
+            if '民間検査' in record:
+                num_private = int(float(record['民間検査']))
+            else:
+                num_private = 0
         
             date = record['年月日']
             date_label = get_date_label(date)
@@ -531,12 +537,14 @@ def conv_inspections_summary(records_dict):
             fukuoka_city_list.append(num_fukuoka_city)
             kitakyushu_city_list.append(num_kitakyushu_city)
             others_list.append(num_others)
+            private_list.append(num_private)
             label_list.append(date_label)
             
         inspections_summary_dict = {
             "福岡市": fukuoka_city_list,
             "北九州市": kitakyushu_city_list,
-            "福岡県※": others_list
+            "福岡県※": others_list,
+            "民間検査": private_list
         }
         
     else:
