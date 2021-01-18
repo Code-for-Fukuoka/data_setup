@@ -242,16 +242,28 @@ def gen_patients_summary(df_patients_summary):
 
     df_patients = df_patients.dropna(subset=['全国地方公共団体コード'])
     
+    np_patients_date = df_patients.公表_年月日.values
+    
     # 陽性患者発表情報を１件ずつチェック
-    for index, row in df_patients.iterrows():
+    ## for index, row in df_patients.iterrows():
+    for index in range(df_patients.shape[0]):
 
-        patients_date = row['公表_年月日']
+        ## patients_date = row['公表_年月日']
+        patients_date = np_patients_date[index]
+        
         patients_pdate = datetime.datetime.strptime( patients_date, '%Y/%m/%d')
         
         # 陽性患者者数の期間の日付に対し、陽性患者者発表情報の公表年月日を比較
         # 一致する場合、陽性患者者数を１加算
-        for index2, row2 in df_patients_summary.iterrows():
-            summary_date = row2['年月日']
+
+        np_summary_date = df_patients_summary.年月日.values
+        
+        ## for index2, row2 in df_patients_summary.iterrows():
+        for index2 in range(df_patients_summary.shape[0]):
+            
+            ## summary_date = row2['年月日']
+            summary_date = np_summary_date[index2]
+            
             summary_pdate = datetime.datetime.strptime(summary_date, '%Y/%m/%d')
 
             if summary_pdate == patients_pdate:
