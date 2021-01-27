@@ -754,7 +754,8 @@ def gen_patients():
     df = df.dropna(subset=['全国地方公共団体コード'])
     
     # df_fill = df.fillna({'退院済フラグ':0})
-
+    df_fill = df
+    
     records_dict = df_fill.to_dict(orient='records')
 
     if '感染経路不明' in df_fill and '濃厚接触者' in df_fill and '海外渡航歴有' in df_fill:
