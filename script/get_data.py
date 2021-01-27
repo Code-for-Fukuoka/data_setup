@@ -273,6 +273,64 @@ def gen_patients_summary(df_patients_summary):
 
     return(df_patients_summary)
 
+
+def check_patients_status_type(df_patients_status):
+
+    old_column = [ '全国地方公共団体コード',
+                   '都道府県名',
+                   '市区町村名',
+                   '公表_年月日',
+                   '曜日',
+                   '陽性患者数累計',
+                   '入院者数累計',
+                   '死亡者数累計',
+                   '退院者数累計' ]
+    
+    new_column = [ '全国地方公共団体コード',
+                   '都道府県名',
+                   '市区町村名',
+                   '公表_年月日',
+                   '曜日',
+                   '陽性者数累計',
+                   '退院者数累計',
+                   '死亡者数累計',
+                   '入院・療養者数',
+                   '入院中の者の数',
+                   'うち確保病床の入院者数',
+                   '宿泊療養中の者の数',
+                   '自宅待機等の者の数' ]
+
+    old_column_type = True
+    new_column_type = True
+    
+    for item in df_patients_status.columns.values:
+
+        if item not in old_column:
+            old_column_type = False
+
+        if item not in new_column:
+            new_column_type = False
+
+            
+    if old_column_type == True:
+        patients_status_type = 'old'
+    elif new_column_type == True:
+        patients_status_type = 'new'
+    else:
+        patients_status_type = 'err'
+
+    return(patients_status_type)
+
+def gen_patients_status():
+
+    patients_status_filename = DATA_DICT['resource']['patients_status']['filename']
+    
+    org_patients_status_filename = DEBUG_PATIENTS_STATUS_FILENAME
+    patients_filepath = I_FILEPATH + "/" + org_patients_status_filename
+    df_patients_status = pd.read_csv(patients_filepath)
+
+    return(df_patients_status)
+
 def save_df(f_title, filename, df):
 
     org_filename = ORG_ID + "_" + filename
@@ -281,6 +339,19 @@ def save_df(f_title, filename, df):
     df.to_csv(filepath)
 
     return()
+
+def gen_patients_status_file(df_patients_status_org):
+
+        
+    df_patients_status_org['D'] = pd.to_datetime(df_patients_status_org['公表_年月日'])
+    latest_date = max(df_patients_status_org['D'])
+        
+    df_latest_patients_status = df_patients_status_org[ df_patients_status_org['D'] == latest_date ]
+    df_latest_patients_status = df_latest_patients_status.reset_index(drop=True)
+    df_latest_patients_status = df_latest_patients_status.rename(columns={'陽性者数累計':'陽性患者数累計'})
+    # df_latest_patients_status['入院者数累計'] = 0
+                                              
+    return(df_latest_patients_status)
 
 def get_resource_file(resource_dict):
 
@@ -291,15 +362,31 @@ def get_resource_file(resource_dict):
         filename = DATA_DICT['resource'][f_title]['filename']
 
         if format == 'url':
+            
             if use == 'True':
                 url = resource_dict[f_title]['resources'][0]['url']
-                # リソースのcsvファイルを取得し、文字コードをutf8へ変換後
-                # dfに格納
-                df = get_resource(f_title, url)
-                # dfをcsvファイルに保存
-                save_df(f_title, filename, df)
+
+                if f_title == "patients_status":
+                    
+                    # patients_statusのデータを生成
+                    df = get_resource(f_title, url)
+                    patients_status_type = check_patients_status_type(df)
+
+                    if patients_status_type == 'new':
+                        df = gen_patients_status_file(df)
+                    
+                    save_df(f_title, filename, df)
+                    
+                else:
+                    
+                    # リソースのcsvファイルを取得し、文字コードをutf8へ変換後
+                    # dfに格納
+                    df = get_resource(f_title, url)
+                    # dfをcsvファイルに保存
+                    save_df(f_title, filename, df)
                 
         elif format == "file":
+            
             if use == 'True':
                 if f_title == "patients_summary":
 
@@ -313,9 +400,27 @@ def get_resource_file(resource_dict):
                     save_df(f_title, filename, df)
                 
                 if f_title == "hotline":
+                    
                     # hotlineのダミーデータを生成
                     df = gen_dummy_hotline()
                     save_df(f_title, filename, df)
+
+
+                # for test
+                if f_title == "patients_status":
+                    
+                    # patients_statusのデータを生成
+                    df_patients_status_org = gen_patients_status()
+                    patients_status_type = check_patients_status_type(df_patients_status_org)
+                    
+                    if patients_status_type == 'new':
+                        filename_extra = f_title + '_daily' + '.csv'
+                        save_df(f_title, filename_extra, df_patients_status_org)
+
+                        df = gen_patients_status_file(df_patients_status_org)
+                    
+                    save_df(f_title, filename, df)
+                    
         else:
             print("wrong format:", "title=", f_title, "format=", format, "use=", use)
             exit()
@@ -380,4 +485,6 @@ if __name__ == '__main__':
     ORG_ID = DATA_DICT['organization']['id']
     BASE_URL = DATA_DICT['organization']['url']
 
+    DEBUG_PATIENTS_STATUS_FILENAME = '400009_pref_fukuoka_covid19_totalpatients.csv'
+    
     main()

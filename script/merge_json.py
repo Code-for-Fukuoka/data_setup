@@ -102,6 +102,7 @@ if __name__ == '__main__':
         "inspections",
         "inspections_summary",
         "better_patients_summary",
+        "patients_status_daily",
         "lastUpdate",
         "main_summary"
         ]

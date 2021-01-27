@@ -660,7 +660,7 @@ def load_input_file(filename):
 
     print("load:", org_filename)
         
-    df = pd.read_csv(file_path)
+    df = pd.read_csv(file_path, index_col=0)
     
     return(df)
 
@@ -957,6 +957,129 @@ def gen_patients_summary(now_date):
         
     return(patients_status)
 
+
+def gen_patients_status_daily_dict(df_patients):
+
+    patients_list_cont = []
+
+    for index, row in df_patients.iterrows():
+
+        data = {}
+
+        data['公表_年月日'] = row['公表_年月日']
+        data['曜日'] = row['曜日']
+        
+        if math.isnan(row['陽性者数累計']):
+            data['陽性者数累計'] = row['陽性者数累計']
+        else:
+            data['陽性者数累計'] = int(row['陽性者数累計'])
+            
+        if math.isnan(row['退院者数累計']):
+            data['退院者数累計'] = row['退院者数累計']
+        else:
+            data['退院者数累計'] = int(row['退院者数累計'])
+            
+        if math.isnan(row['死亡者数累計']):
+            data['死亡者数累計'] = row['死亡者数累計']
+        else:
+            data['死亡者数累計'] = int(row['死亡者数累計'])
+
+        if math.isnan(row['入院・療養者数']):
+            data['入院・療養者数'] = row['入院・療養者数']
+        else:
+            data['入院・療養者数'] = int(row['入院・療養者数'])
+            
+        if math.isnan(row['入院中の者の数']):
+            data['入院中の者の数'] = row['入院中の者の数']
+        else:
+            data['入院中の者の数'] = int(row['入院中の者の数'])
+            
+        if math.isnan(row['うち確保病床の入院者数']):
+            data['うち確保病床の入院者数'] = row['うち確保病床の入院者数']
+        else:
+            data['うち確保病床の入院者数'] = int(row['うち確保病床の入院者数'])
+            
+        if math.isnan(row['宿泊療養中の者の数']):
+            data['宿泊療養中の者の数'] = row['宿泊療養中の者の数']
+        else:
+            data['宿泊療養中の者の数'] = int(row['宿泊療養中の者の数'])
+            
+        if math.isnan(row['自宅待機等の者の数']):
+            data['自宅待機等の者の数'] = row['自宅待機等の者の数']
+        else:
+            data['自宅待機等の者の数'] = int(row['自宅待機等の者の数'])
+
+        patients_list_cont.append(data)
+        
+    return(patients_list_cont)
+
+def gen_patients_status_daily(now_date):
+
+    f_title = "patients_status"
+    filename = DATA_DICT['resource'][f_title]['filename']
+    
+    type = DATA_DICT['resource'][f_title]['type']
+    
+    df = load_input_file(filename)
+    df_fill = df.fillna({'件数':0})
+    df_patients = df_fill
+
+    patients_status_type = check_patients_status_type(df_patients)
+    
+    if patients_status_type == 'new':
+        filename = f_title + '_daily' + '.csv'
+        df_patients = load_input_file(filename)
+        patients_list_cont = gen_patients_status_daily_dict(df_patients)
+    else:
+        patients_list_cont = []
+
+
+    data_title = 'patients_status_daily'
+    
+    patients_dict = {
+        data_title : {
+        'date': now_date,
+        'data': patients_list_cont
+            }
+    }
+        
+        
+    filename = DATA_DICT['resource'][f_title]['filename']
+    filename = f_title + '_daily' + '.json'
+    
+    output_json(O_FILEPATH, filename, patients_dict)
+        
+    return(patients_dict)
+
+def check_patients_status_type(df_patients):
+
+    new_column = [ '全国地方公共団体コード',
+                   '都道府県名',
+                   '市区町村名',
+                   '公表_年月日',
+                   '曜日',
+                   # '陽性者数累計',
+                   '退院者数累計',
+                   '死亡者数累計',
+                   '入院・療養者数',
+                   '入院中の者の数',
+                   'うち確保病床の入院者数',
+                   '宿泊療養中の者の数',
+                   '自宅待機等の者の数' ]
+
+    new_column_type = True
+    
+    for item in new_column:
+        if item not in df_patients.columns.values:
+            new_column_type = False
+
+    if new_column_type == True:
+        patients_status_type = 'new'
+    else:
+        patients_status_type = 'old'
+        
+    return(patients_status_type)
+
 def gen_patients_status():
 
     f_title = "patients_status"
@@ -968,6 +1091,8 @@ def gen_patients_status():
     df_fill = df.fillna({'件数':0})
     df_patients = df_fill
 
+    patients_status_type = check_patients_status_type(df_patients)
+    
     latest_date_p = datetime.datetime.strptime('2020/03/01', "%Y/%m/%d")
     latest_index = 0
     latest_patients = 0
@@ -987,7 +1112,12 @@ def gen_patients_status():
             latest_date_p = date_p
             latest_index = index
             latest_patients = row['陽性患者数累計']
-            latest_hospitalized = row['入院者数累計']
+            
+            if patients_status_type == 'old':
+                latest_hospitalized = row['入院者数累計']
+            elif patients_status_type == 'new':
+                latest_hospitalized = row['入院・療養者数']
+                
             latest_died = row['死亡者数累計']
             latest_discharged = row['退院者数累計']
 
@@ -1001,7 +1131,7 @@ def gen_patients_status():
     patients_status['total_heavy'] = '-'
 
     return(patients_status)
-    
+
 def main_sub():
 
     now = datetime.datetime.now()
@@ -1058,7 +1188,9 @@ def main_sub():
             if use == 'True':
                 
                 patients_status_status = gen_patients_status()
-                
+
+                patients_status_dict = gen_patients_status_daily(now_date)
+                    
         else:
 
             use = DATA_DICT['resource'][f_title]['use']
