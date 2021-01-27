@@ -292,12 +292,8 @@ def conv_patients(records_dict, infection_route_info):
         age = record['年代']
         ageOrg = age
 
-        age = age.translate(str.maketrans({chr(0xFF01 + i): chr(0x21 + i) for i in range(94)}))
-        
         # collect invalid age input
         if re.match(r'1[a-zA-Z0-9]代未満', age):
-            age = '10代未満'
-        elif re.match(r'1歳未満', age):
             age = '10代未満'
         elif re.match(r'1[a-zA-Z0-9]代', age):
             age = '10代'
@@ -319,21 +315,13 @@ def conv_patients(records_dict, infection_route_info):
             age = '90代'
         elif re.match(r'9[a-zA-Z0-9]歳以上', age):
             age = '90代'            
-        elif re.match(r'9[a-zA-Z0-9]代以上', age):
-            age = '90代'            
         elif re.search(r'-|‐', age):
             age = '調査中'
         
         sex = record['性別']
         if re.search(r'-|‐', sex):
             sex = '調査中'
-        elif re.match(r'女', sex):
-            sex = '女性'
-        elif re.match(r'男', sex):
-            sex = '男性'
-        else:
-            sex = '調査中'
-            
+        
         if record['退院済フラグ'] == 1:
             discharge = '○'
         else: 
