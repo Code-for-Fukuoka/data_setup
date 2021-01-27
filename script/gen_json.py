@@ -321,11 +321,15 @@ def conv_patients(records_dict, infection_route_info):
         sex = record['性別']
         if re.search(r'-|‐', sex):
             sex = '調査中'
-        
+
+        """
         if record['退院済フラグ'] == 1:
             discharge = '○'
         else: 
             discharge = ''
+        """
+            
+        discharge = ''
 
         if infection_route_info:
             if record['感染経路不明'] == 1:
@@ -749,7 +753,7 @@ def gen_patients():
     # 　全国地方公共団体コードが空白の場合に削除
     df = df.dropna(subset=['全国地方公共団体コード'])
     
-    df_fill = df.fillna({'退院済フラグ':0})
+    # df_fill = df.fillna({'退院済フラグ':0})
 
     records_dict = df_fill.to_dict(orient='records')
 
