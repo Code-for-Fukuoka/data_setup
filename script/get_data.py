@@ -241,6 +241,7 @@ def gen_patients_summary(df_patients_summary):
     df_patients = pd.read_csv(patients_filepath)
 
     df_patients = df_patients.dropna(subset=['全国地方公共団体コード'])
+    df_patients = df_patients.dropna(subset=['公表_年月日'])
     
     np_patients_date = df_patients.公表_年月日.values
     

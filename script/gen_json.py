@@ -752,6 +752,7 @@ def gen_patients():
     # 空白行の削除に対応
     # 　全国地方公共団体コードが空白の場合に削除
     df = df.dropna(subset=['全国地方公共団体コード'])
+    df = df.dropna(subset=['公表_年月日'])
     
     # df_fill = df.fillna({'退院済フラグ':0})
     df_fill = df
