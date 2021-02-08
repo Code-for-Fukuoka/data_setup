@@ -321,7 +321,12 @@ def conv_patients(records_dict, infection_route_info):
         sex = record['性別']
         if re.search(r'-|‐', sex):
             sex = '調査中'
-
+        elif sex == '女':
+            sex = '女性'
+        elif sex == '男':
+            sex = '男性'
+            
+        
         """
         if record['退院済フラグ'] == 1:
             discharge = '○'
