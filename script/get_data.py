@@ -322,13 +322,19 @@ def check_patients_status_type(df_patients_status):
 
     return(patients_status_type)
 
-def gen_patients_status():
+def gen_patients_status(f_title, url, format):
 
-    patients_status_filename = DATA_DICT['resource']['patients_status']['filename']
+    if format == 'url':
+
+        df_patients_status = get_resource(f_title, url)
+
+    else:
     
-    org_patients_status_filename = DEBUG_PATIENTS_STATUS_FILENAME
-    patients_filepath = I_FILEPATH + "/" + org_patients_status_filename
-    df_patients_status = pd.read_csv(patients_filepath)
+        patients_status_filename = DATA_DICT['resource']['patients_status']['filename']
+    
+        org_patients_status_filename = DEBUG_PATIENTS_STATUS_FILENAME
+        patients_filepath = I_FILEPATH + "/" + org_patients_status_filename
+        df_patients_status = pd.read_csv(patients_filepath)
 
     return(df_patients_status)
 
@@ -374,8 +380,12 @@ def get_resource_file(resource_dict):
                     patients_status_type = check_patients_status_type(df)
 
                     if patients_status_type == 'new':
+
+                        df = gen_patients_status(f_title, url, format)
+                        filename_extra = f_title + '_daily' + '.csv'
+                        save_df(f_title, filename_extra, df)
                         df = gen_patients_status_file(df)
-                    
+
                     save_df(f_title, filename, df)
                     
                 else:
@@ -415,6 +425,7 @@ def get_resource_file(resource_dict):
                     patients_status_type = check_patients_status_type(df_patients_status_org)
                     
                     if patients_status_type == 'new':
+
                         filename_extra = f_title + '_daily' + '.csv'
                         save_df(f_title, filename_extra, df_patients_status_org)
 

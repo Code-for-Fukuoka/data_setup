@@ -996,22 +996,22 @@ def gen_patients_status_daily_dict(df_patients):
             data['入院・療養者数'] = int(row['入院・療養者数'])
             
         if math.isnan(row['入院中の者の数']):
-            data['入院中の者の数'] = row['入院中の者の数']
+            data['入院中の者の数'] = 'NA'
         else:
             data['入院中の者の数'] = int(row['入院中の者の数'])
             
         if math.isnan(row['うち確保病床の入院者数']):
-            data['うち確保病床の入院者数'] = row['うち確保病床の入院者数']
+            data['うち確保病床の入院者数'] = 'NA'
         else:
             data['うち確保病床の入院者数'] = int(row['うち確保病床の入院者数'])
             
         if math.isnan(row['宿泊療養中の者の数']):
-            data['宿泊療養中の者の数'] = row['宿泊療養中の者の数']
+            data['宿泊療養中の者の数'] = 'NA'
         else:
             data['宿泊療養中の者の数'] = int(row['宿泊療養中の者の数'])
             
         if math.isnan(row['自宅待機等の者の数']):
-            data['自宅待機等の者の数'] = row['自宅待機等の者の数']
+            data['自宅待機等の者の数'] = 'NA'
         else:
             data['自宅待機等の者の数'] = int(row['自宅待機等の者の数'])
 
