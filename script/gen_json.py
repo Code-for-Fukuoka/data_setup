@@ -295,6 +295,8 @@ def conv_patients(records_dict, infection_route_info):
         # collect invalid age input
         if re.match(r'1[a-zA-Z0-9]代未満', age):
             age = '10代未満'
+        elif re.match(r'1[a-zA-Z0-9]歳未満', age):
+            age = '10代未満'
         elif re.match(r'1[a-zA-Z0-9]代', age):
             age = '10代'
         elif re.match(r'2[a-zA-Z0-9]代', age):
