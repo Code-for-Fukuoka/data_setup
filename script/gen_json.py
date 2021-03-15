@@ -998,7 +998,7 @@ def gen_patients_status_daily_dict(df_patients):
             data['死亡者数累計'] = int(row['死亡者数累計'])
 
         if math.isnan(row['入院・療養者数']):
-            data['入院・療養者数'] = row['入院・療養者数']
+            data['入院・療養者数'] = '確認中'
         else:
             data['入院・療養者数'] = int(row['入院・療養者数'])
             
