@@ -1129,7 +1129,10 @@ def gen_patients_status():
             if patients_status_type == 'old':
                 latest_hospitalized = row['入院者数累計']
             elif patients_status_type == 'new':
-                latest_hospitalized = row['入院・療養者数']
+                if math.isnan(row['入院・療養者数']):
+                    latest_hospitalized = '確認中'
+                else:
+                    latest_hospitalized = int(row['入院・療養者数'])
                 
             latest_died = row['死亡者数累計']
             latest_discharged = row['退院者数累計']
